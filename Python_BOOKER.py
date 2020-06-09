@@ -25,46 +25,51 @@ def get_proxies(uri_IP):
 		ip = str(ip).replace('<td>','')
 		ip = str(ip).replace('</td>','')
 		port = str(port).replace('<td>','')
-		port = str(port).replace('</td>','')
+		port = str(port).replace('</td>','') #这部分写的不好 还需要继续改进 当时为了图简单 就这样写了
 		proxies.append("http://"+ip+":"+port)
 		num_of_proxies += 1
 	return proxies, num_of_proxies
 
-def function(url, proxies):
-	# 注：免费的代理IP可以在这个网站上获取：http://www.xicidaili.com/nn/
+def get_url_all(url, proxies):
 	r = requests.get(url, proxies=proxies)
 	data = r.text
-	 
+	
 	# 利用正则查找所有连接
 	link_list =re.findall(r"(?<=href=\"https://blog.csdn.net/qq_34792438/article/details).+?(?=\")" ,data)
 	url_all = []
-
 	num_of_url = 0
 	for url in {}.fromkeys(link_list).keys():
-		if url == "/99676743":
+		if url == "/99676743":#这篇booker不需要访问
 			continue
 		else:
 			url_all.append("https://blog.csdn.net/qq_34792438/article/details"+url)
 			num_of_url += 1
+	return url_all, num_of_url
+		
+def open_url(url, proxies):
+	# 注：免费的代理IP可以在这个网站上获取：http://www.xicidaili.com/nn/
+	r = requests.get(url, proxies=proxies)
 
-	url = url_all[random.randint(0, num_of_url-1)]
-
-	r = requests.get(url, timeout=5)
-	result = r.status_code
-
-	# 3.如果网页地址有效则打开网页
-	if (result == 200):
-	    # 4.打开浏览器
-	    webbrowser.open(url)
-	    # 5.关闭浏览器
-	    # os.system('taskkill /F /IM Iexplore.exe')
-	    os.system('taskkill /F /IM Chrome.exe')
+	# result = r.status_code
+	# # 3.如果网页地址有效则打开网页
+	# if (result == 200):
+	#     # 4.打开浏览器
+	#     print(url)
+	#     webbrowser.open(url)
+	#     # 5.关闭浏览器
+	#     # os.system('taskkill /F /IM Iexplore.exe')
+	#     os.system('taskkill /F /IM Chrome.exe')
 
 if __name__=='__main__':
 	uri_IP = "http://www.xicidaili.com/nn/"
 	proxies_list, num_of_proxies = get_proxies(uri_IP)
 	url = 'https://blog.csdn.net/qq_34792438/article/'
+	# 输入自己的booker地址即可
+	proxies={'http':proxies_list[random.randint(0, num_of_proxies-1)]}
+	url_list, num_of_url = get_url_all(url, proxies)
+
 	while 1:
-		proxies={'http':proxies_list[random.randint(0, num_of_proxies-1)]}
-		function(url, proxies)
+		proxies = {'http':proxies_list[random.randint(0, num_of_proxies-1)]}
+		url = url_list[random.randint(0, num_of_url-1)]
+		open_url(url, proxies)
 
